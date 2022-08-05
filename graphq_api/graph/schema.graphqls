@@ -1,0 +1,29 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+type Blog {
+  id: Int!
+  username: String!
+  content: String!
+}
+
+input NewBlog {
+  username: String!
+  content: String!
+}
+
+type Query {
+  blogs: [Blog!]!
+  blog(id: Int!): Blog!
+}
+
+
+type Mutation {
+  createBlog(input: NewBlog!): Blog!
+  deleteBlog(id: Int!): Blog!
+}
+
+type Subscription {
+  hello: String!
+}

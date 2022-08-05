@@ -1,0 +1,58 @@
+version: "3.9"
+services: 
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: user@domain.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "80:80"
+  postgres:
+    image: 'postgres:latest'
+    platform: linux/arm64
+    restart: always
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: grpcDB
+      PGDATA: /var/lib/postgresql/data/culo/
+    ports:
+      - "5432:5432"
+    volumes:
+      - data:/var/lib/postgresql/data
+  nats:
+    build: ./nats
+    ports: 
+      - "4222:4222"
+  service_one:
+    build: ./service_one
+    ports: 
+      - "50050:50050"
+    depends_on: 
+      - postgres
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: grpcDB
+    restart: always
+  service_two:
+    build: ./service_two
+    ports: 
+      - "50051:50051"
+    depends_on: 
+      - service_one
+    environment:
+      SERVER_ONE_URL: "service_one:50050"
+    restart: always
+  graphq_api:
+    build: ./graphq_api
+    ports:
+      - "8080:8080"
+    environment:
+      SERVER_TWO_URL: "service_two:50051"
+    restart: always
+
+volumes: 
+  data:

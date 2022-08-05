@@ -1,0 +1,3 @@
+FROM nats
+
+EXPOSE 4222
