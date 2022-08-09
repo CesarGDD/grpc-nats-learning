@@ -1,0 +1,39 @@
+query Blogs {
+  blogs {
+    id
+    username
+    content
+  }
+}
+
+query Blog($blogId: Int!) {
+  blog(id: $blogId) {
+    id
+    username
+    content
+  }
+}
+
+mutation CreateBlog($input: NewBlog!) {
+  createBlog(input: $input) {
+    id
+    username
+    content
+  }
+}
+
+mutation DeleteBlog($deleteBlogId: Int!) {
+  deleteBlog(id: $deleteBlogId) {
+    id
+    username
+    content
+  }
+}
+
+subscription BlogSub {
+  blog {
+    id
+    username
+    content
+  }
+}

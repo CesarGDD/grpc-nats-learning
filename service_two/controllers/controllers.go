@@ -4,6 +4,7 @@ import (
 	"cesargdd/service_two/blogpb"
 	"cesargdd/service_two/server"
 	"context"
+	"encoding/json"
 	"fmt"
 )
 
@@ -36,7 +37,11 @@ func (*Server) GetBlog(ctx context.Context, req *blogpb.GetBlogRequest) (*blogpb
 	if err != nil {
 		return nil, err
 	}
-	nc.Publish("foo", []byte("Hello World"))
+	blogBytes, err := json.Marshal(res.Blog)
+	if err != nil {
+		return nil, err
+	}
+	nc.Publish("foo", blogBytes)
 	return res, nil
 }
 func (*Server) GetBlogs(ctx context.Context, req *blogpb.GetBlogsRequest) (*blogpb.GetBlogsResponse, error) {

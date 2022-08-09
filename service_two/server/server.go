@@ -2,6 +2,7 @@ package server
 
 import (
 	"cesargdd/service_two/blogpb"
+	"fmt"
 	"log"
 	"os"
 
@@ -22,6 +23,9 @@ func BlogSrv() blogpb.BlogServiceClient {
 }
 
 func NatsSvc() *nats.Conn {
-	nc, _ := nats.Connect(nats.DefaultURL)
+	nc, err := nats.Connect(os.Getenv("NATS_URL"))
+	if err != nil {
+		fmt.Println(err)
+	}
 	return nc
 }

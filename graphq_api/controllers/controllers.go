@@ -5,7 +5,10 @@ import (
 	"cesargdd/graphql_test/graph/model"
 	"cesargdd/graphql_test/server"
 	"context"
+	"encoding/json"
 	"fmt"
+
+	"github.com/nats-io/nats.go"
 )
 
 type Server struct {
@@ -13,6 +16,7 @@ type Server struct {
 }
 
 var blogSvc = server.BlogSrv()
+var nc = server.NatsSvc()
 
 func CreateBlog(ctx context.Context, input model.NewBlog) (*blogpb.Blog, error) {
 	fmt.Println("create blog graphql")
@@ -54,4 +58,29 @@ func Blog(ctx context.Context, id int) (*blogpb.Blog, error) {
 		return nil, err
 	}
 	return res.Blog, nil
+}
+
+func BlogSubscription(ctx context.Context) (<-chan *blogpb.Blog, error) {
+	blog := make(chan *blogpb.Blog)
+	res := &blogpb.Blog{}
+	unsub, err := nc.Subscribe("foo", func(msg *nats.Msg) {
+		go func() {
+			fmt.Printf("Received a message: %s\n", string(msg.Data))
+			if err := json.Unmarshal(msg.Data, &res); err != nil {
+				fmt.Println(err)
+			}
+			blog <- res
+		}()
+	})
+	if err != nil {
+		return nil, err
+	}
+	go func() {
+		<-ctx.Done()
+		if err := unsub.Unsubscribe(); err != nil {
+			_ = err
+		}
+		close(blog)
+	}()
+	return blog, nil
 }
